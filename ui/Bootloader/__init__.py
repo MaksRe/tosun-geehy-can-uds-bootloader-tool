@@ -1,0 +1,2 @@
+"""Bootloader tab UI."""
+
