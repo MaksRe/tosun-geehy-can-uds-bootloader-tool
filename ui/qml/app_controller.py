@@ -13,6 +13,7 @@ from colors import RowColor
 from j1939.j1939_can_identifier import J1939CanIdentifier
 from uds.bootloader import Bootloader
 from uds.firmware import Firmware, FirmwareState
+from uds.services.ecu_reset import ServiceEcuReset
 from uds.uds_identifiers import UdsIdentifiers
 
 LOGGER = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class AppController(QObject):
     canFilterOptionsChanged = Signal()
     infoMessage = Signal(str, str)
     programmingActiveChanged = Signal()
+    autoResetBeforeProgrammingChanged = Signal()
     debugEnabledChanged = Signal()
     firmwareLoadingChanged = Signal()
     transferByteOrderIndexChanged = Signal()
@@ -64,6 +66,7 @@ class AppController(QObject):
         self._can = CanDevice.instance()
         self._bootloader = Bootloader()
         self._bootloader.set_transfer_byte_order("big")
+        self._ui_ecu_reset_service = ServiceEcuReset()
 
         # Display labels for ComboBox and actual hardware indexes from TSCAN.
         self._devices: list[str] = []
@@ -99,6 +102,9 @@ class AppController(QObject):
             "data": 80,
         }
         self._programming_active = False
+        self._auto_reset_before_programming = True
+        self._auto_reset_delay_ms = 650
+        self._pending_programming_after_reset = False
         self._debug_enabled = False
         self._firmware_loading = False
         self._transfer_byte_order_index = 0
@@ -147,6 +153,10 @@ class AppController(QObject):
         self._can_filter_rebuild_timer.setSingleShot(True)
         self._can_filter_rebuild_timer.setInterval(90)
         self._can_filter_rebuild_timer.timeout.connect(self._rebuild_can_traffic_view)
+
+        self._programming_start_timer = QTimer(self)
+        self._programming_start_timer.setSingleShot(True)
+        self._programming_start_timer.timeout.connect(self._start_programming_after_reset)
 
         self._rebuild_can_traffic_view()
 
@@ -258,6 +268,10 @@ class AppController(QObject):
     def programmingActive(self):
         return self._programming_active
 
+    @Property(bool, notify=autoResetBeforeProgrammingChanged)
+    def autoResetBeforeProgramming(self):
+        return self._auto_reset_before_programming
+
     @Property(bool, notify=debugEnabledChanged)
     def debugEnabled(self):
         return self._debug_enabled
@@ -346,6 +360,16 @@ class AppController(QObject):
         self._debug_enabled = value
         self.debugEnabledChanged.emit()
         self.infoMessage.emit("Отладка", "Режим отладки включен." if value else "Режим отладки отключен.")
+
+    @Slot(bool)
+    def setAutoResetBeforeProgramming(self, enabled):
+        value = bool(enabled)
+        if self._auto_reset_before_programming == value:
+            return
+        self._auto_reset_before_programming = value
+        self.autoResetBeforeProgrammingChanged.emit()
+        state_text = "включен" if value else "отключен"
+        self._append_log(f"Автосброс перед программированием: {state_text}", QColor("#0ea5e9"))
 
     @Slot(int)
     def setTransferByteOrderIndex(self, index):
@@ -612,6 +636,10 @@ class AppController(QObject):
             self._can.stop_trace()
             self._device_handle = ""
             self._reset_observed_uds_candidate()
+            if self._programming_start_timer.isActive():
+                self._programming_start_timer.stop()
+            self._pending_programming_after_reset = False
+            self._set_programming_active(False)
             self.deviceInfoChanged.emit()
             self.connectionStateChanged.emit()
             self.traceStateChanged.emit()
@@ -669,9 +697,36 @@ class AppController(QObject):
 
     @Slot()
     def startProgramming(self):
+        if self._programming_active:
+            return
+
+        if not self._can.is_connect:
+            self.infoMessage.emit("Программирование", "Сначала подключите CAN-адаптер.")
+            return
+
+        if self._firmware_loading:
+            self.infoMessage.emit("Программирование", "Дождитесь завершения загрузки BIN-файла.")
+            return
+
         self._set_programming_active(True)
-        if not self._bootloader.start():
-            self._set_programming_active(False)
+
+        if self._auto_reset_before_programming:
+            self._pending_programming_after_reset = True
+            self._append_log("Автосброс: отправка команды перехода в загрузчик", RowColor.blue)
+
+            try:
+                self._ui_ecu_reset_service.ecu_uds_reset()
+            except Exception:
+                self._pending_programming_after_reset = False
+                self._set_programming_active(False)
+                self._append_log("Автосброс: ошибка отправки команды", RowColor.red)
+                self.infoMessage.emit("Программирование", "Не удалось отправить команду автосброса.")
+                return
+
+            self._programming_start_timer.start(self._auto_reset_delay_ms)
+            return
+
+        self._start_programming_flow()
 
     @Slot()
     def checkState(self):
@@ -679,11 +734,21 @@ class AppController(QObject):
 
     @Slot()
     def resetToBootloader(self):
-        self._bootloader.ecu_uds_reset()
+        if not self._can.is_connect:
+            self.infoMessage.emit("Сброс", "Сначала подключите CAN-адаптер.")
+            return
+
+        self._ui_ecu_reset_service.ecu_uds_reset()
+        self._append_log("Отправлена команда сброса в загрузчик", RowColor.blue)
 
     @Slot()
     def resetToMainProgram(self):
-        self._bootloader.ecu_software_reset()
+        if not self._can.is_connect:
+            self.infoMessage.emit("Сброс", "Сначала подключите CAN-адаптер.")
+            return
+
+        self._ui_ecu_reset_service.ecu_software_reset()
+        self._append_log("Отправлена команда сброса в основное ПО", RowColor.blue)
 
     @Slot()
     def clearLogs(self):
@@ -731,11 +796,37 @@ class AppController(QObject):
         self.progressChanged.emit()
 
     def _on_programming_finished(self, success):
+        if self._programming_start_timer.isActive():
+            self._programming_start_timer.stop()
+        self._pending_programming_after_reset = False
         self._set_programming_active(False)
-        if success:
-            self._progress_value = self._progress_max
-            self.progressChanged.emit()
-            self.infoMessage.emit("Программирование", "Программирование успешно завершено.")
+        if not success:
+            return
+
+        self._progress_value = self._progress_max
+        self.progressChanged.emit()
+        self._append_log("Программирование успешно завершено", RowColor.green)
+
+        if not self._can.is_connect:
+            self.infoMessage.emit(
+                "Программирование",
+                "Программирование завершено, но CAN отключен: автосброс в основное ПО не отправлен.",
+            )
+            return
+
+        try:
+            self._ui_ecu_reset_service.ecu_software_reset()
+            self._append_log("Автосброс: отправлена команда перехода в основное ПО", RowColor.blue)
+            self.infoMessage.emit(
+                "Программирование",
+                "Программирование завершено. Отправлена команда запуска основного ПО.",
+            )
+        except Exception:
+            self._append_log("Автосброс: ошибка отправки команды перехода в основное ПО", RowColor.red)
+            self.infoMessage.emit(
+                "Программирование",
+                "Программирование завершено, но автосброс в основное ПО не отправлен.",
+            )
 
     def _on_trace_state_event(self):
         self._rx_time_anchor_raw = None
@@ -1193,10 +1284,27 @@ class AppController(QObject):
         return str(path_or_url)
 
     def _set_programming_active(self, active):
-        if self._programming_active == active:
+        value = bool(active)
+        if not value:
+            if self._programming_start_timer.isActive():
+                self._programming_start_timer.stop()
+            self._pending_programming_after_reset = False
+
+        if self._programming_active == value:
             return
-        self._programming_active = active
+        self._programming_active = value
         self.programmingActiveChanged.emit()
+
+    def _start_programming_after_reset(self):
+        if not self._pending_programming_after_reset:
+            return
+        self._pending_programming_after_reset = False
+        self._append_log("Автосброс завершен, запуск сценария программирования", RowColor.blue)
+        self._start_programming_flow()
+
+    def _start_programming_flow(self):
+        if not self._bootloader.start():
+            self._set_programming_active(False)
 
     def _set_source_address_busy(self, busy):
         value = bool(busy)

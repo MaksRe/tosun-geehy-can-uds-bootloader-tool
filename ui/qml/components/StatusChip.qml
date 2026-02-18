@@ -19,19 +19,19 @@ Rectangle {
     property color chipBorder: "#c6d7ea"
     property color textColor: "#1f2d3d"
 
-    radius: 10
+    radius: 9
     color: chipColor
     border.color: chipBorder
     border.width: 1
-    implicitHeight: 30
-    implicitWidth: labelText.implicitWidth + 18
+    implicitHeight: 28
+    implicitWidth: labelText.implicitWidth + 16
 
     Text {
         id: labelText
         anchors.centerIn: parent
         text: root.label
         color: root.textColor
-        font.pixelSize: 13
+        font.pixelSize: 12
         font.family: "Bahnschrift"
     }
 }

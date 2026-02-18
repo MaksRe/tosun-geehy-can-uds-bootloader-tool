@@ -14,7 +14,7 @@ Rectangle {
     property color cardColor: "#ffffff"
     property color cardBorder: "#d6e2ef"
 
-    radius: 18
+    radius: 14
     color: cardColor
     border.color: cardBorder
     border.width: 1

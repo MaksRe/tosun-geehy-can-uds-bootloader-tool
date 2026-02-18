@@ -21,8 +21,8 @@ ApplicationWindow {
     id: window
 
     visible: true
-    width: 1360
-    height: 860
+    width: 1320
+    height: 840
     minimumWidth: 1040
     minimumHeight: 720
     title: "TOSUN Geehy CAN UDS Загрузчик"
@@ -219,13 +219,13 @@ ApplicationWindow {
     ScrollView {
         id: contentScroll
         anchors.fill: parent
-        anchors.margins: 20
+        anchors.margins: 16
         clip: true
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
             width: Math.max(0, contentScroll.availableWidth)
-            spacing: 16
+            spacing: 12
 
             HeaderCard {
                 appController: window.backendController
@@ -247,9 +247,9 @@ ApplicationWindow {
             Item {
                 id: dashboardArea
                 Layout.fillWidth: true
-                readonly property bool wideLayout: contentScroll.availableWidth > 1260
-                readonly property int sidePanelWidth: 500
-                readonly property int gap: 16
+                readonly property bool wideLayout: contentScroll.availableWidth > 1180
+                readonly property int sidePanelWidth: Math.max(430, Math.min(500, Math.round(contentScroll.availableWidth * 0.36)))
+                readonly property int gap: 12
                 implicitHeight: dashboardLoader.item ? dashboardLoader.item.implicitHeight : 0
 
                 Loader {
@@ -309,40 +309,89 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignTop
                             spacing: dashboardArea.gap
 
-                            AutoDetectCard {
-                                appController: window.backendController
+                            SpoilerSection {
+                                title: "Автоопределение адреса"
+                                hintText: "Дополнительный функционал"
                                 cardColor: window.cardColor
                                 cardBorder: window.cardBorder
                                 textMain: window.textMain
                                 textSoft: window.textSoft
-                                inputBg: window.inputBg
-                                inputBorder: window.inputBorder
-                                inputFocus: window.inputFocus
                                 Layout.fillWidth: true
+
+                                AutoDetectCard {
+                                    appController: window.backendController
+                                    cardColor: window.cardColor
+                                    cardBorder: window.cardBorder
+                                    textMain: window.textMain
+                                    textSoft: window.textSoft
+                                    inputBg: window.inputBg
+                                    inputBorder: window.inputBorder
+                                    inputFocus: window.inputFocus
+                                    Layout.fillWidth: true
+                                }
                             }
 
-                            IdentifiersCard {
-                                appController: window.backendController
+                            SpoilerSection {
+                                title: "UDS CAN идентификаторы"
+                                hintText: "Дополнительный функционал"
                                 cardColor: window.cardColor
                                 cardBorder: window.cardBorder
                                 textMain: window.textMain
                                 textSoft: window.textSoft
-                                inputBg: window.inputBg
-                                inputBorder: window.inputBorder
-                                inputFocus: window.inputFocus
                                 Layout.fillWidth: true
+
+                                IdentifiersCard {
+                                    appController: window.backendController
+                                    cardColor: window.cardColor
+                                    cardBorder: window.cardBorder
+                                    textMain: window.textMain
+                                    textSoft: window.textSoft
+                                    inputBg: window.inputBg
+                                    inputBorder: window.inputBorder
+                                    inputFocus: window.inputFocus
+                                    Layout.fillWidth: true
+                                }
                             }
 
-                            ProtocolCard {
-                                appController: window.backendController
+                            SpoilerSection {
+                                title: "Параметры протокола"
+                                hintText: "Дополнительный функционал"
                                 cardColor: window.cardColor
                                 cardBorder: window.cardBorder
                                 textMain: window.textMain
                                 textSoft: window.textSoft
-                                inputBg: window.inputBg
-                                inputBorder: window.inputBorder
-                                inputFocus: window.inputFocus
                                 Layout.fillWidth: true
+
+                                ProtocolCard {
+                                    appController: window.backendController
+                                    cardColor: window.cardColor
+                                    cardBorder: window.cardBorder
+                                    textMain: window.textMain
+                                    textSoft: window.textSoft
+                                    inputBg: window.inputBg
+                                    inputBorder: window.inputBorder
+                                    inputFocus: window.inputFocus
+                                    Layout.fillWidth: true
+                                }
+                            }
+
+                            SpoilerSection {
+                                title: "Сервисные команды"
+                                hintText: "Дополнительный функционал (отладка)"
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                Layout.fillWidth: true
+
+                                DebugToolsCard {
+                                    appController: window.backendController
+                                    cardColor: window.cardColor
+                                    cardBorder: window.cardBorder
+                                    textMain: window.textMain
+                                    textSoft: window.textSoft
+                                    Layout.fillWidth: true
+                                }
                             }
                         }
                     }
@@ -366,40 +415,89 @@ ApplicationWindow {
                             Layout.fillWidth: true
                         }
 
-                        AutoDetectCard {
-                            appController: window.backendController
+                        SpoilerSection {
+                            title: "Автоопределение адреса"
+                            hintText: "Дополнительный функционал"
                             cardColor: window.cardColor
                             cardBorder: window.cardBorder
                             textMain: window.textMain
                             textSoft: window.textSoft
-                            inputBg: window.inputBg
-                            inputBorder: window.inputBorder
-                            inputFocus: window.inputFocus
                             Layout.fillWidth: true
+
+                            AutoDetectCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
                         }
 
-                        IdentifiersCard {
-                            appController: window.backendController
+                        SpoilerSection {
+                            title: "UDS CAN идентификаторы"
+                            hintText: "Дополнительный функционал"
                             cardColor: window.cardColor
                             cardBorder: window.cardBorder
                             textMain: window.textMain
                             textSoft: window.textSoft
-                            inputBg: window.inputBg
-                            inputBorder: window.inputBorder
-                            inputFocus: window.inputFocus
                             Layout.fillWidth: true
+
+                            IdentifiersCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
                         }
 
-                        ProtocolCard {
-                            appController: window.backendController
+                        SpoilerSection {
+                            title: "Параметры протокола"
+                            hintText: "Дополнительный функционал"
                             cardColor: window.cardColor
                             cardBorder: window.cardBorder
                             textMain: window.textMain
                             textSoft: window.textSoft
-                            inputBg: window.inputBg
-                            inputBorder: window.inputBorder
-                            inputFocus: window.inputFocus
                             Layout.fillWidth: true
+
+                            ProtocolCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                        SpoilerSection {
+                            title: "Сервисные команды"
+                            hintText: "Дополнительный функционал (отладка)"
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            Layout.fillWidth: true
+
+                            DebugToolsCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                Layout.fillWidth: true
+                            }
                         }
 
                         BootloaderCard {

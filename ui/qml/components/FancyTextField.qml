@@ -26,13 +26,13 @@ TextField {
     placeholderTextColor: placeholderColor
     palette.text: textColor
     palette.placeholderText: placeholderColor
-    font.pixelSize: 14
+    font.pixelSize: 13
     font.family: fontFamily
     selectByMouse: true
-    padding: 12
+    padding: 9
 
     background: Rectangle {
-        radius: 12
+        radius: 10
         color: bgColor
         border.width: field.activeFocus ? 2 : 1
         border.color: field.activeFocus ? focusBorderColor : borderColor

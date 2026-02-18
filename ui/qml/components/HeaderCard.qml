@@ -13,32 +13,54 @@ Card {
     property color textMain: "#1f2d3d"
     property color accentWarm: "#f59e0b"
     readonly property bool compactLayout: width < 1120
+    readonly property int contentPadding: 14
 
     readonly property bool canConnected: appController ? appController.connected : false
     readonly property bool traceActive: appController ? appController.tracing : false
     readonly property bool programmingActive: appController ? appController.programmingActive : false
     signal openCanJournalRequested()
 
-    implicitHeight: root.compactLayout ? 208 : 154
+    implicitHeight: headerColumn.implicitHeight + (root.contentPadding * 2)
 
     ColumnLayout {
+        id: headerColumn
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 10
+        anchors.margins: root.contentPadding
+        spacing: 8
 
-        Text {
-            text: "Панель программирования CAN / UDS"
-            color: root.textMain
-            font.pixelSize: 30
-            font.bold: true
-            font.family: "Bahnschrift"
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+
+            Text {
+                Layout.fillWidth: true
+                text: "Панель программирования CAN / UDS"
+                color: root.textMain
+                font.pixelSize: 26
+                font.bold: true
+                font.family: "Bahnschrift"
+                elide: Text.ElideRight
+            }
+
+            FancyButton {
+                Layout.alignment: Qt.AlignVCenter
+                Layout.preferredWidth: root.compactLayout ? 150 : 164
+                Layout.minimumWidth: 142
+                Layout.preferredHeight: 34
+                text: "Журнал CAN"
+                fontPixelSize: 12
+                tone: "#0ea5a4"
+                toneHover: "#0f766e"
+                tonePressed: "#115e59"
+                onClicked: root.openCanJournalRequested()
+            }
         }
 
         GridLayout {
             Layout.fillWidth: true
             columns: root.compactLayout ? 2 : 4
-            columnSpacing: 10
-            rowSpacing: 8
+            columnSpacing: 8
+            rowSpacing: 6
 
             StatusChip {
                 Layout.fillWidth: root.compactLayout
@@ -76,14 +98,14 @@ Card {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 8
-                    spacing: 8
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 7
+                    spacing: 6
 
                     Text {
                         text: "Отладка"
                         color: root.textMain
-                        font.pixelSize: 13
+                        font.pixelSize: 12
                         font.family: "Bahnschrift"
                     }
 
@@ -91,8 +113,8 @@ Card {
 
                     FancySwitch {
                         id: debugSwitch
-                        trackWidth: 50
-                        trackHeight: 28
+                        trackWidth: 46
+                        trackHeight: 26
                         onColor: "#10b981"
                         offColor: "#dfe9f5"
                         borderOnColor: "#059669"
@@ -108,21 +130,5 @@ Card {
             }
         }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
-
-            Item { Layout.fillWidth: true }
-
-            FancyButton {
-                Layout.preferredWidth: 176
-                Layout.minimumWidth: 160
-                text: "Открыть журнал CAN"
-                tone: "#0ea5a4"
-                toneHover: "#0f766e"
-                tonePressed: "#115e59"
-                onClicked: root.openCanJournalRequested()
-            }
-        }
     }
 }

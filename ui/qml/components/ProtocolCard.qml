@@ -18,29 +18,38 @@ Card {
     property color inputBg: "#f7fbff"
     property color inputBorder: "#c8d9ea"
     property color inputFocus: "#0ea5e9"
+    property bool showCardHeader: false
+    readonly property int contentPadding: 12
     readonly property bool sourceAddressWriteBusy: root.appController ? (root.appController.sourceAddressBusy && root.appController.sourceAddressOperation === "write") : false
     readonly property bool sourceAddressReadBusy: root.appController ? (root.appController.sourceAddressBusy && root.appController.sourceAddressOperation === "read") : false
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 360
+    implicitHeight: contentColumn.implicitHeight + (root.contentPadding * 2)
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 18
-        spacing: 12
+        id: contentColumn
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: root.contentPadding
+        anchors.rightMargin: root.contentPadding
+        anchors.topMargin: root.contentPadding
+        spacing: 8
 
         Text {
             text: "Параметры протокола"
+            visible: root.showCardHeader
             color: root.textMain
-            font.pixelSize: 22
+            font.pixelSize: 18
             font.bold: true
             font.family: "Bahnschrift"
         }
 
         Text {
             text: "Изменение Source Address и порядка байтов UDS"
+            visible: root.showCardHeader
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
             wrapMode: Text.WordWrap
         }
@@ -48,7 +57,7 @@ Card {
         Text {
             text: "Адрес источника (Source Address, SA)"
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
@@ -56,7 +65,7 @@ Card {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             FancyTextField {
                 id: sourceAddressField
@@ -74,8 +83,8 @@ Card {
             }
 
             FancyButton {
-                Layout.preferredWidth: 156
-                Layout.minimumWidth: 148
+                Layout.preferredWidth: 146
+                Layout.minimumWidth: 136
                 text: root.sourceAddressWriteBusy ? "Применение..." : "Применить SA"
                 loading: root.sourceAddressWriteBusy
                 enabled: root.appController ? (!root.appController.sourceAddressBusy && !root.appController.programmingActive) : false
@@ -88,7 +97,7 @@ Card {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             Item {
                 Layout.fillWidth: true
@@ -99,8 +108,8 @@ Card {
                 text: root.sourceAddressReadBusy ? "Чтение..." : "Прочитать SA"
                 enabled: root.appController ? (!root.appController.sourceAddressBusy && !root.appController.programmingActive) : false
                 loading: root.sourceAddressReadBusy
-                Layout.preferredWidth: 156
-                Layout.minimumWidth: 148
+                Layout.preferredWidth: 146
+                Layout.minimumWidth: 136
                 tone: "#2563eb"
                 toneHover: "#1d4ed8"
                 tonePressed: "#1e40af"
@@ -111,7 +120,7 @@ Card {
         Text {
             text: "Порядок байтов при передаче"
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
             Layout.fillWidth: true
         }
@@ -131,7 +140,6 @@ Card {
             onActivated: if (root.appController) root.appController.setTransferByteOrderIndex(currentIndex)
         }
 
-        Item { Layout.fillHeight: true }
     }
 
     Connections {

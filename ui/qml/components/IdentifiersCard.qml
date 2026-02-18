@@ -12,11 +12,13 @@ Card {
     property color inputBg: "#f7fbff"
     property color inputBorder: "#c8d9ea"
     property color inputFocus: "#0ea5e9"
+    property bool showCardHeader: false
+    readonly property int contentPadding: 12
 
     readonly property bool controlsEnabled: root.appController ? (!root.appController.programmingActive && !root.appController.sourceAddressBusy) : false
 
     Layout.fillWidth: true
-    Layout.preferredHeight: contentColumn.implicitHeight + 36
+    Layout.preferredHeight: contentColumn.implicitHeight + (root.contentPadding * 2)
 
     function syncFromController() {
         if (!root.appController) {
@@ -39,21 +41,23 @@ Card {
     ColumnLayout {
         id: contentColumn
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 10
+        anchors.margins: root.contentPadding
+        spacing: 8
 
         Text {
             text: "UDS CAN идентификаторы"
+            visible: root.showCardHeader
             color: root.textMain
-            font.pixelSize: 22
+            font.pixelSize: 18
             font.bold: true
             font.family: "Bahnschrift"
         }
 
         Text {
             text: "Изменяйте поля J1939 отдельно для TX и RX: Priority, PGN, Source, Destination"
+            visible: root.showCardHeader
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
@@ -62,17 +66,17 @@ Card {
         Rectangle {
             id: txBox
             Layout.fillWidth: true
-            Layout.preferredHeight: txColumn.implicitHeight + 20
-            Layout.minimumHeight: txColumn.implicitHeight + 20
-            radius: 12
+            Layout.preferredHeight: txColumn.implicitHeight + 16
+            Layout.minimumHeight: txColumn.implicitHeight + 16
+            radius: 10
             color: "#f4f8fd"
             border.color: "#d6e2ef"
 
             ColumnLayout {
                 id: txColumn
                 anchors.fill: parent
-                anchors.margins: 10
-                spacing: 8
+                anchors.margins: 8
+                spacing: 6
 
                 Text {
                     text: "TX (отправка)"
@@ -85,14 +89,14 @@ Card {
                 GridLayout {
                     Layout.fillWidth: true
                     columns: 2
-                    rowSpacing: 8
-                    columnSpacing: 10
+                    rowSpacing: 6
+                    columnSpacing: 8
 
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Приоритет"
@@ -118,7 +122,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "PGN (2 байта)"
@@ -144,7 +148,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Адрес источника (SRC)"
@@ -170,7 +174,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Адрес назначения (DST)"
@@ -196,7 +200,7 @@ Card {
                 Text {
                     text: "TX ID: " + (root.appController ? root.appController.txIdentifierText : "-")
                     color: root.textSoft
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                     font.family: "Bahnschrift"
                 }
             }
@@ -205,17 +209,17 @@ Card {
         Rectangle {
             id: rxBox
             Layout.fillWidth: true
-            Layout.preferredHeight: rxColumn.implicitHeight + 20
-            Layout.minimumHeight: rxColumn.implicitHeight + 20
-            radius: 12
+            Layout.preferredHeight: rxColumn.implicitHeight + 16
+            Layout.minimumHeight: rxColumn.implicitHeight + 16
+            radius: 10
             color: "#f4f8fd"
             border.color: "#d6e2ef"
 
             ColumnLayout {
                 id: rxColumn
                 anchors.fill: parent
-                anchors.margins: 10
-                spacing: 8
+                anchors.margins: 8
+                spacing: 6
 
                 Text {
                     text: "RX (прием)"
@@ -228,14 +232,14 @@ Card {
                 GridLayout {
                     Layout.fillWidth: true
                     columns: 2
-                    rowSpacing: 8
-                    columnSpacing: 10
+                    rowSpacing: 6
+                    columnSpacing: 8
 
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Приоритет"
@@ -261,7 +265,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "PGN (2 байта)"
@@ -287,7 +291,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Адрес источника (SRC)"
@@ -313,7 +317,7 @@ Card {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.minimumWidth: 0
-                        spacing: 4
+                        spacing: 2
 
                         Text {
                             text: "Адрес назначения (DST)"
@@ -339,7 +343,7 @@ Card {
                 Text {
                     text: "RX ID: " + (root.appController ? root.appController.rxIdentifierText : "-")
                     color: root.textSoft
-                    font.pixelSize: 12
+                    font.pixelSize: 11
                     font.family: "Bahnschrift"
                 }
             }
@@ -347,7 +351,7 @@ Card {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 6
 
             FancyButton {
                 Layout.fillWidth: true

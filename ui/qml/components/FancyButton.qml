@@ -23,12 +23,12 @@ Item {
 
     signal clicked()
 
-    implicitHeight: 42
+    implicitHeight: 38
     implicitWidth: Math.max(120, label.implicitWidth + (btn.loading ? 52 : 24))
 
     Rectangle {
         anchors.fill: parent
-        radius: 12
+        radius: 10
         antialiasing: true
         border.width: 1
         border.color: btn.interactiveEnabled ? "#3f83d9" : "#b9c9d9"

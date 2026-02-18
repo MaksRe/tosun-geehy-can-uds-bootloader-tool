@@ -25,19 +25,25 @@ Card {
     property color inputBg: "#f7fbff"
     property color inputBorder: "#c8d9ea"
     property color inputFocus: "#0ea5e9"
+    readonly property int contentPadding: 14
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 530
+    implicitHeight: contentColumn.implicitHeight + (root.contentPadding * 2)
 
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: 18
-        spacing: 12
+        id: contentColumn
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: root.contentPadding
+        anchors.rightMargin: root.contentPadding
+        anchors.topMargin: root.contentPadding
+        spacing: 10
 
         Text {
             text: "Аппаратное подключение"
             color: root.textMain
-            font.pixelSize: 22
+            font.pixelSize: 20
             font.bold: true
             font.family: "Bahnschrift"
         }
@@ -45,14 +51,14 @@ Card {
         Text {
             text: "Выберите адаптер, подключитесь и запустите trace"
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
         }
 
         // Строка выбора физического USB/CAN устройства.
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             FancyComboBox {
                 id: deviceCombo
@@ -81,8 +87,8 @@ Card {
             }
 
             FancyButton {
-                Layout.preferredWidth: 156
-                Layout.minimumWidth: 148
+                Layout.preferredWidth: 148
+                Layout.minimumWidth: 136
                 text: "Сканировать"
                 debugLog: root.appController ? root.appController.debugEnabled : false
                 tone: "#0ea5a4"
@@ -107,7 +113,7 @@ Card {
         // Базовые действия связи: открыть/закрыть канал и старт/стоп trace.
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             FancyButton {
                 Layout.fillWidth: true
@@ -141,14 +147,14 @@ Card {
         GridLayout {
             Layout.fillWidth: true
             columns: 3
-            columnSpacing: 10
-            rowSpacing: 6
+            columnSpacing: 8
+            rowSpacing: 4
 
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.minimumWidth: 0
-                spacing: 4
+                spacing: 2
 
                 Text {
                     text: "CAN канал"
@@ -174,7 +180,7 @@ Card {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.minimumWidth: 0
-                spacing: 4
+                spacing: 2
 
                 Text {
                     text: "Скорость, кбит/с"
@@ -200,7 +206,7 @@ Card {
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
                 Layout.minimumWidth: 0
-                spacing: 4
+                spacing: 2
 
                 Text {
                     text: "Терминатор"
@@ -211,8 +217,8 @@ Card {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    implicitHeight: 44
-                    radius: 12
+                    implicitHeight: 40
+                    radius: 10
                     color: root.inputBg
                     border.color: root.inputBorder
                     border.width: 1
@@ -240,22 +246,24 @@ Card {
         // Техническая информация о выбранном устройстве.
         Rectangle {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            radius: 14
+            Layout.preferredHeight: infoGrid.implicitHeight + 14
+            radius: 10
             color: "#f4f8fd"
             border.color: "#d6e2ef"
 
             GridLayout {
+                id: infoGrid
                 anchors.fill: parent
-                anchors.margins: 14
+                anchors.margins: 8
                 columns: 1
-                rowSpacing: 10
+                rowSpacing: 4
 
                 LabelValue {
                     labelText: "Производитель"
                     valueText: root.appController ? root.appController.manufacturer : ""
                     labelColor: root.textSoft
                     valueColor: root.textMain
+                    labelWidth: 160
                 }
 
                 LabelValue {
@@ -263,6 +271,7 @@ Card {
                     valueText: root.appController ? root.appController.product : ""
                     labelColor: root.textSoft
                     valueColor: root.textMain
+                    labelWidth: 160
                 }
 
                 LabelValue {
@@ -270,6 +279,7 @@ Card {
                     valueText: root.appController ? root.appController.serial : ""
                     labelColor: root.textSoft
                     valueColor: root.textMain
+                    labelWidth: 160
                 }
 
                 LabelValue {
@@ -277,6 +287,7 @@ Card {
                     valueText: root.appController ? root.appController.deviceHandle : ""
                     labelColor: root.textSoft
                     valueColor: root.textMain
+                    labelWidth: 160
                 }
             }
         }

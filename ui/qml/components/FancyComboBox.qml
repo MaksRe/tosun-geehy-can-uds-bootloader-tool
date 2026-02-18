@@ -28,13 +28,13 @@ ComboBox {
     property color highlightedItemTextColor: "#1c3f66"
     property string fontFamily: "Bahnschrift"
 
-    implicitHeight: 44
-    font.pixelSize: 14
+    implicitHeight: 40
+    font.pixelSize: 13
     font.family: fontFamily
 
     contentItem: Text {
-        leftPadding: 12
-        rightPadding: 34
+        leftPadding: 10
+        rightPadding: 30
         text: combo.displayText
         font: combo.font
         color: textColor
@@ -44,7 +44,7 @@ ComboBox {
 
     // Индикатор стрелки рисуется Canvas-ом, чтобы не тянуть отдельный ресурс-иконку.
     indicator: Canvas {
-        x: combo.width - width - 12
+        x: combo.width - width - 10
         y: combo.topPadding + (combo.availableHeight - height) / 2
         width: 11
         height: 7
@@ -62,20 +62,20 @@ ComboBox {
     }
 
     background: Rectangle {
-        radius: 12
+        radius: 10
         color: bgColor
         border.width: combo.activeFocus ? 2 : 1
         border.color: combo.activeFocus ? focusBorderColor : borderColor
     }
 
     popup: Popup {
-        y: combo.height + 6
+        y: combo.height + 4
         width: combo.width
         implicitHeight: Math.min(contentItem.implicitHeight + 8, 220)
         padding: 4
 
         background: Rectangle {
-            radius: 12
+            radius: 10
             color: popupColor
             border.color: popupBorderColor
             border.width: 1
@@ -94,7 +94,7 @@ ComboBox {
 
     delegate: ItemDelegate {
         width: combo.width - 8
-        height: 36
+        height: 32
 
         // Универсальное извлечение текста элемента модели:
         // 1) прямое значение string/number;
@@ -123,7 +123,7 @@ ComboBox {
         }
 
         background: Rectangle {
-            radius: 8
+            radius: 7
             color: parent.highlighted ? highlightedItemColor : "transparent"
         }
     }

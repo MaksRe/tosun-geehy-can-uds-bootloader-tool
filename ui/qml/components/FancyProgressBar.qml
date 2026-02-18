@@ -19,10 +19,10 @@ ProgressBar {
     property color fillStartColor: "#38bdf8"
     property color fillEndColor: "#0ea5e9"
 
-    implicitHeight: 24
+    implicitHeight: 20
 
     background: Rectangle {
-        radius: 12
+        radius: 10
         color: trackColor
         border.color: trackBorderColor
         border.width: 1
@@ -35,8 +35,8 @@ ProgressBar {
             anchors.bottom: parent.bottom
 
             // Ограничиваем минимум ширины видимой части, чтобы прогресс не выглядел "мертвым" на старте.
-            width: control.visualPosition <= 0 ? 0 : Math.max(18, parent.width * control.visualPosition)
-            radius: 12
+            width: control.visualPosition <= 0 ? 0 : Math.max(14, parent.width * control.visualPosition)
+            radius: 10
             visible: width > 0
 
             gradient: Gradient {

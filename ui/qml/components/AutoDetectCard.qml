@@ -12,29 +12,33 @@ Card {
     property color inputBg: "#f7fbff"
     property color inputBorder: "#c8d9ea"
     property color inputFocus: "#0ea5e9"
+    property bool showCardHeader: false
+    readonly property int contentPadding: 12
     readonly property bool controlsEnabled: root.appController ? (!root.appController.programmingActive && !root.appController.sourceAddressBusy) : false
 
     Layout.fillWidth: true
-    Layout.preferredHeight: contentColumn.implicitHeight + 36
+    Layout.preferredHeight: contentColumn.implicitHeight + (root.contentPadding * 2)
 
     ColumnLayout {
         id: contentColumn
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 10
+        anchors.margins: root.contentPadding
+        spacing: 8
 
         Text {
             text: "Автоопределение адреса"
+            visible: root.showCardHeader
             color: root.textMain
-            font.pixelSize: 22
+            font.pixelSize: 18
             font.bold: true
             font.family: "Bahnschrift"
         }
 
         Text {
             text: "Анализ входящего RX J1939 потока и выбор кандидата адреса устройства"
+            visible: root.showCardHeader
             color: root.textSoft
-            font.pixelSize: 13
+            font.pixelSize: 12
             font.family: "Bahnschrift"
             wrapMode: Text.WordWrap
             Layout.fillWidth: true
@@ -43,7 +47,7 @@ Card {
         Text {
             text: "Кандидат адреса из потока"
             color: root.textSoft
-            font.pixelSize: 12
+            font.pixelSize: 11
             font.family: "Bahnschrift"
             Layout.fillWidth: true
         }
@@ -69,18 +73,18 @@ Card {
 
         Rectangle {
             Layout.fillWidth: true
-            radius: 10
+            radius: 9
             color: "#eef5ff"
             border.color: "#c9d8ec"
-            implicitHeight: statusText.implicitHeight + 16
+            implicitHeight: statusText.implicitHeight + 12
 
             Text {
                 id: statusText
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.margins: 6
                 text: root.appController ? root.appController.observedUdsCandidateText : "Контроллер недоступен"
                 color: root.textSoft
-                font.pixelSize: 12
+                font.pixelSize: 11
                 font.family: "Bahnschrift"
                 wrapMode: Text.WordWrap
             }
@@ -88,11 +92,11 @@ Card {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
             FancyButton {
                 Layout.fillWidth: true
-                Layout.minimumWidth: 168
+                Layout.minimumWidth: 148
                 text: "Применить адрес"
                 enabled: root.controlsEnabled
                          && root.appController !== null
@@ -105,7 +109,7 @@ Card {
 
             FancyButton {
                 Layout.fillWidth: true
-                Layout.minimumWidth: 140
+                Layout.minimumWidth: 120
                 text: "Сбросить"
                 enabled: root.appController !== null && root.appController.observedUdsCandidateAvailable
                 tone: "#64748b"

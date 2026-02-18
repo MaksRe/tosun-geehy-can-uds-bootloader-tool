@@ -27,7 +27,7 @@ Card {
     readonly property int colUds: 210
 
     readonly property int rowLeftPadding: 8
-    readonly property int rowSpacing: 8
+    readonly property int rowSpacing: 6
     readonly property int headerRightPadding: 8 + ((trafficScrollBar && trafficScrollBar.visible) ? trafficScrollBar.width : 0)
 
     function optionsWithAny(options) {
@@ -84,16 +84,16 @@ Card {
     }
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 350
+    Layout.preferredHeight: 332
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 18
-        spacing: 8
+        anchors.margins: 14
+        spacing: 6
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 6
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -102,7 +102,7 @@ Card {
                 Text {
                     text: "Журнал CAN"
                     color: root.textMain
-                    font.pixelSize: 22
+                    font.pixelSize: 20
                     font.bold: true
                     font.family: "Bahnschrift"
                 }
@@ -110,7 +110,7 @@ Card {
                 Text {
                     text: "TX/RX сообщения с разбором ID, PGN, адресов и ISO-TP"
                     color: root.textSoft
-                    font.pixelSize: 13
+                    font.pixelSize: 12
                     font.family: "Bahnschrift"
                 }
             }
@@ -144,7 +144,7 @@ Card {
 
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 34
+            implicitHeight: 32
             radius: 10
             color: "#e9f1fa"
             border.color: "#c9d8e8"
@@ -172,7 +172,7 @@ Card {
         // Единая строка фильтров: выбор из выпадающего списка + произвольный ввод.
         Rectangle {
             Layout.fillWidth: true
-            implicitHeight: 34
+            implicitHeight: 32
             radius: 10
             color: "#f7fbff"
             border.color: "#d8e4f0"
@@ -210,17 +210,17 @@ Card {
                 anchors.fill: parent
                 anchors.leftMargin: 0
                 anchors.rightMargin: 0
-                anchors.topMargin: 8
-                anchors.bottomMargin: 8
+                anchors.topMargin: 6
+                anchors.bottomMargin: 6
                 clip: true
-                spacing: 4
+                spacing: 3
                 model: root.appController ? root.appController.filteredCanTrafficLogs : []
 
                 onCountChanged: if (count > 0) positionViewAtEnd()
 
                 delegate: Rectangle {
                     width: trafficList.width
-                    height: 28
+                    height: 26
                     radius: 8
                     color: index % 2 === 0 ? "#f8fbff" : "#eef4fb"
                     border.width: 1
@@ -280,8 +280,7 @@ Card {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.bottomMargin: -2
-            spacing: 8
+            spacing: 6
 
             Item {
                 Layout.fillWidth: true
