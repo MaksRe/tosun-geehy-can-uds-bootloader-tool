@@ -17,8 +17,9 @@ Card {
     readonly property bool canConnected: appController ? appController.connected : false
     readonly property bool traceActive: appController ? appController.tracing : false
     readonly property bool programmingActive: appController ? appController.programmingActive : false
+    signal openCanJournalRequested()
 
-    implicitHeight: root.compactLayout ? 164 : 120
+    implicitHeight: root.compactLayout ? 208 : 154
 
     ColumnLayout {
         anchors.fill: parent
@@ -26,7 +27,7 @@ Card {
         spacing: 10
 
         Text {
-            text: "CAN / UDS Bootloader Workspace"
+            text: "Панель программирования CAN / UDS"
             color: root.textMain
             font.pixelSize: 30
             font.bold: true
@@ -41,7 +42,7 @@ Card {
 
             StatusChip {
                 Layout.fillWidth: root.compactLayout
-                label: root.canConnected ? "CAN: connected" : "CAN: disconnected"
+                label: root.canConnected ? "CAN: подключен" : "CAN: отключен"
                 chipColor: root.canConnected ? "#e6f8ef" : "#fdecec"
                 chipBorder: root.canConnected ? "#7acda5" : "#f5a5a5"
                 textColor: root.textMain
@@ -49,7 +50,7 @@ Card {
 
             StatusChip {
                 Layout.fillWidth: root.compactLayout
-                label: root.traceActive ? "Trace: active" : "Trace: off"
+                label: root.traceActive ? "Трассировка: активна" : "Трассировка: выкл"
                 chipColor: root.traceActive ? "#e9f2ff" : "#f1f5fa"
                 chipBorder: root.traceActive ? "#93c5fd" : "#c6d7ea"
                 textColor: root.textMain
@@ -57,7 +58,7 @@ Card {
 
             StatusChip {
                 Layout.fillWidth: root.compactLayout
-                label: root.programmingActive ? "Programming: running" : "Programming: idle"
+                label: root.programmingActive ? "Программирование: идет" : "Программирование: готово"
                 chipColor: root.programmingActive ? "#fff4e6" : "#f1f5fa"
                 chipBorder: root.programmingActive ? root.accentWarm : "#c6d7ea"
                 textColor: root.textMain
@@ -104,6 +105,23 @@ Card {
                         }
                     }
                 }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 10
+
+            Item { Layout.fillWidth: true }
+
+            FancyButton {
+                Layout.preferredWidth: 176
+                Layout.minimumWidth: 160
+                text: "Открыть журнал CAN"
+                tone: "#0ea5a4"
+                toneHover: "#0f766e"
+                tonePressed: "#115e59"
+                onClicked: root.openCanJournalRequested()
             }
         }
     }

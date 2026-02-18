@@ -57,6 +57,7 @@ Card {
             FancyComboBox {
                 id: deviceCombo
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 model: root.appController ? root.appController.devices : []
                 currentIndex: root.appController ? root.appController.selectedDeviceIndex : -1
                 textColor: root.textMain
@@ -80,6 +81,8 @@ Card {
             }
 
             FancyButton {
+                Layout.preferredWidth: 156
+                Layout.minimumWidth: 148
                 text: "Сканировать"
                 debugLog: root.appController ? root.appController.debugEnabled : false
                 tone: "#0ea5a4"
@@ -108,6 +111,8 @@ Card {
 
             FancyButton {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 text: root.appController ? root.appController.connectionActionText : "Подключиться"
                 tone: "#3b82f6"
                 toneHover: "#2563eb"
@@ -117,6 +122,8 @@ Card {
 
             FancyButton {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 text: root.appController ? root.appController.traceActionText : "Запустить трассировку"
                 enabled: root.appController ? root.appController.connected : false
                 tone: "#16a34a"
@@ -131,65 +138,100 @@ Card {
         }
 
         // Параметры CAN-шины для текущей trace-сессии.
-        RowLayout {
+        GridLayout {
             Layout.fillWidth: true
-            spacing: 10
+            columns: 3
+            columnSpacing: 10
+            rowSpacing: 6
 
-            FancyComboBox {
-                id: channelCombo
+            ColumnLayout {
                 Layout.fillWidth: true
-                model: ["Канал 1", "Канал 2", "Канал 3", "Канал 4"]
-                currentIndex: 0
-                textColor: root.textMain
-                bgColor: root.inputBg
-                borderColor: root.inputBorder
-                focusBorderColor: root.inputFocus
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                spacing: 4
+
+                Text {
+                    text: "CAN канал"
+                    color: root.textSoft
+                    font.pixelSize: 12
+                    font.family: "Bahnschrift"
+                }
+
+                FancyComboBox {
+                    id: channelCombo
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    model: ["Канал 1", "Канал 2", "Канал 3", "Канал 4"]
+                    currentIndex: 0
+                    textColor: root.textMain
+                    bgColor: root.inputBg
+                    borderColor: root.inputBorder
+                    focusBorderColor: root.inputFocus
+                }
             }
 
-            FancyComboBox {
-                id: baudCombo
+            ColumnLayout {
                 Layout.fillWidth: true
-                model: ["125", "250", "500", "1000"]
-                currentIndex: 2
-                textColor: root.textMain
-                bgColor: root.inputBg
-                borderColor: root.inputBorder
-                focusBorderColor: root.inputFocus
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                spacing: 4
+
+                Text {
+                    text: "Скорость, кбит/с"
+                    color: root.textSoft
+                    font.pixelSize: 12
+                    font.family: "Bahnschrift"
+                }
+
+                FancyComboBox {
+                    id: baudCombo
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    model: ["125", "250", "500", "1000"]
+                    currentIndex: 2
+                    textColor: root.textMain
+                    bgColor: root.inputBg
+                    borderColor: root.inputBorder
+                    focusBorderColor: root.inputFocus
+                }
             }
 
-            Rectangle {
-                radius: 12
-                color: root.inputBg
-                border.color: root.inputBorder
-                border.width: 1
-                implicitHeight: 44
-                implicitWidth: 150
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
+                spacing: 4
 
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 10
-                    spacing: 8
+                Text {
+                    text: "Терминатор"
+                    color: root.textSoft
+                    font.pixelSize: 12
+                    font.family: "Bahnschrift"
+                }
 
-                    Text {
-                        text: "Терминатор"
-                        color: root.textSoft
-                        font.pixelSize: 13
-                        font.family: "Bahnschrift"
-                    }
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 44
+                    radius: 12
+                    color: root.inputBg
+                    border.color: root.inputBorder
+                    border.width: 1
 
-                    Item { Layout.fillWidth: true }
+                    Item {
+                        anchors.fill: parent
 
-                    // Аппаратный терминатор (обычно 120 Ом), если поддерживается адаптером.
-                    FancySwitch {
-                        id: terminatorSwitch
-                        trackWidth: 48
-                        trackHeight: 26
-                        onColor: "#0ea5e9"
-                        offColor: "#e4ecf7"
-                        borderOnColor: "#0284c7"
-                        borderOffColor: "#c0d1e4"
-                        checked: true
+                        // Аппаратный терминатор (обычно 120 Ом), если поддерживается адаптером.
+                        FancySwitch {
+                            id: terminatorSwitch
+                            anchors.centerIn: parent
+                            trackWidth: 48
+                            trackHeight: 26
+                            onColor: "#0ea5e9"
+                            offColor: "#e4ecf7"
+                            borderOnColor: "#0284c7"
+                            borderOffColor: "#c0d1e4"
+                            checked: true
+                        }
                     }
                 }
             }
@@ -231,7 +273,7 @@ Card {
                 }
 
                 LabelValue {
-                    labelText: "Device Handle"
+                    labelText: "Идентификатор устройства"
                     valueText: root.appController ? root.appController.deviceHandle : ""
                     labelColor: root.textSoft
                     valueColor: root.textMain
@@ -240,4 +282,3 @@ Card {
         }
     }
 }
-

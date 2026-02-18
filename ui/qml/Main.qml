@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import QtQuick.Dialogs
+import QtQuick.Window 2.15
 import "components"
 
 /*
@@ -24,7 +25,7 @@ ApplicationWindow {
     height: 860
     minimumWidth: 1040
     minimumHeight: 720
-    title: "TOSUN Geehy CAN UDS Bootloader Tool"
+    title: "TOSUN Geehy CAN UDS Загрузчик"
 
     // Централизованная палитра для согласованного оформления всех дочерних компонентов.
     readonly property color bgStart: "#f9fcff"
@@ -157,7 +158,7 @@ ApplicationWindow {
     FileDialog {
         id: firmwareDialog
         title: "Выберите BIN-файл"
-        nameFilters: ["BIN files (*.bin)", "All files (*)"]
+        nameFilters: ["BIN файлы (*.bin)", "Все файлы (*)"]
         onAccepted: {
             var chosen = ""
             if (selectedFile) {
@@ -173,7 +174,7 @@ ApplicationWindow {
             }
             if (!window.backendController) {
                 console.error("[UI][Main] appController is null in FileDialog.onAccepted")
-                window.showToast("Debug", "appController is null in FileDialog")
+                window.showToast("Отладка", "appController не найден в FileDialog")
                 return
             }
 
@@ -182,6 +183,36 @@ ApplicationWindow {
             }
 
             window.backendController.loadFirmware(chosen)
+        }
+    }
+
+    Window {
+        id: canJournalWindow
+        width: 1320
+        height: 430
+        minimumWidth: 980
+        minimumHeight: 320
+        visible: false
+        modality: Qt.NonModal
+        title: "Журнал CAN"
+        transientParent: window
+
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: window.bgStart }
+                GradientStop { position: 1.0; color: window.bgEnd }
+            }
+        }
+
+        CanTrafficCard {
+            anchors.fill: parent
+            anchors.margins: 14
+            appController: window.backendController
+            cardColor: window.cardColor
+            cardBorder: window.cardBorder
+            textMain: window.textMain
+            textSoft: window.textSoft
         }
     }
 
@@ -203,39 +234,190 @@ ApplicationWindow {
                 textMain: window.textMain
                 accentWarm: window.accentWarm
                 Layout.fillWidth: true
+                onOpenCanJournalRequested: {
+                    canJournalWindow.visible = true
+                    canJournalWindow.raise()
+                    canJournalWindow.requestActivate()
+                }
             }
 
-            // Адаптивная сетка: на широком экране две карточки в ряд,
-            // на узком - одна под другой.
-            GridLayout {
+            // Адаптивная компоновка:
+            // - широкое окно: две независимые колонки (левая и правая);
+            // - узкое окно: карточки идут последовательно в один столбец.
+            Item {
+                id: dashboardArea
                 Layout.fillWidth: true
-                columns: contentScroll.availableWidth > 1260 ? 2 : 1
-                columnSpacing: 16
-                rowSpacing: 16
+                readonly property bool wideLayout: contentScroll.availableWidth > 1260
+                readonly property int sidePanelWidth: 500
+                readonly property int gap: 16
+                implicitHeight: dashboardLoader.item ? dashboardLoader.item.implicitHeight : 0
 
-                ConnectionCard {
-                    appController: window.backendController
-                    cardColor: window.cardColor
-                    cardBorder: window.cardBorder
-                    textMain: window.textMain
-                    textSoft: window.textSoft
-                    inputBg: window.inputBg
-                    inputBorder: window.inputBorder
-                    inputFocus: window.inputFocus
+                Loader {
+                    id: dashboardLoader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    sourceComponent: dashboardArea.wideLayout ? wideDashboard : narrowDashboard
+                    onLoaded: if (item) item.width = width
+                    onWidthChanged: if (item) item.width = width
                 }
 
-                BootloaderCard {
-                    appController: window.backendController
-                    cardColor: window.cardColor
-                    cardBorder: window.cardBorder
-                    textMain: window.textMain
-                    textSoft: window.textSoft
-                    inputBg: window.inputBg
-                    inputBorder: window.inputBorder
-                    inputFocus: window.inputFocus
-                    onOpenFirmwareDialogRequested: firmwareDialog.open()
+                Component {
+                    id: wideDashboard
+
+                    RowLayout {
+                        spacing: dashboardArea.gap
+                        implicitHeight: Math.max(leftColumn.implicitHeight, rightColumn.implicitHeight)
+
+                        ColumnLayout {
+                            id: leftColumn
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignTop
+                            spacing: dashboardArea.gap
+
+                            ConnectionCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
+
+                            BootloaderCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                                onOpenFirmwareDialogRequested: firmwareDialog.open()
+                            }
+                        }
+
+                        ColumnLayout {
+                            id: rightColumn
+                            Layout.minimumWidth: dashboardArea.sidePanelWidth
+                            Layout.preferredWidth: dashboardArea.sidePanelWidth
+                            Layout.maximumWidth: dashboardArea.sidePanelWidth
+                            Layout.alignment: Qt.AlignTop
+                            spacing: dashboardArea.gap
+
+                            AutoDetectCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
+
+                            IdentifiersCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
+
+                            ProtocolCard {
+                                appController: window.backendController
+                                cardColor: window.cardColor
+                                cardBorder: window.cardBorder
+                                textMain: window.textMain
+                                textSoft: window.textSoft
+                                inputBg: window.inputBg
+                                inputBorder: window.inputBorder
+                                inputFocus: window.inputFocus
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+                }
+
+                Component {
+                    id: narrowDashboard
+
+                    ColumnLayout {
+                        spacing: dashboardArea.gap
+
+                        ConnectionCard {
+                            appController: window.backendController
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            inputBg: window.inputBg
+                            inputBorder: window.inputBorder
+                            inputFocus: window.inputFocus
+                            Layout.fillWidth: true
+                        }
+
+                        AutoDetectCard {
+                            appController: window.backendController
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            inputBg: window.inputBg
+                            inputBorder: window.inputBorder
+                            inputFocus: window.inputFocus
+                            Layout.fillWidth: true
+                        }
+
+                        IdentifiersCard {
+                            appController: window.backendController
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            inputBg: window.inputBg
+                            inputBorder: window.inputBorder
+                            inputFocus: window.inputFocus
+                            Layout.fillWidth: true
+                        }
+
+                        ProtocolCard {
+                            appController: window.backendController
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            inputBg: window.inputBg
+                            inputBorder: window.inputBorder
+                            inputFocus: window.inputFocus
+                            Layout.fillWidth: true
+                        }
+
+                        BootloaderCard {
+                            appController: window.backendController
+                            cardColor: window.cardColor
+                            cardBorder: window.cardBorder
+                            textMain: window.textMain
+                            textSoft: window.textSoft
+                            inputBg: window.inputBg
+                            inputBorder: window.inputBorder
+                            inputFocus: window.inputFocus
+                            Layout.fillWidth: true
+                            onOpenFirmwareDialogRequested: firmwareDialog.open()
+                        }
+                    }
                 }
             }
+
         }
     }
 
@@ -246,7 +428,7 @@ ApplicationWindow {
         }
         if (!window.backendController) {
             console.error("[UI][Main] appController is null on startup")
-            window.showToast("Debug", "appController is null on startup")
+            window.showToast("Отладка", "appController не найден при старте")
             return
         }
 

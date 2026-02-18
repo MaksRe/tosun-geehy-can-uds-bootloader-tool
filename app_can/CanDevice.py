@@ -1,4 +1,4 @@
-import time
+﻿import time
 import logging
 from ctypes import c_char_p, c_float
 from dataclasses import dataclass
@@ -218,54 +218,23 @@ class CanDevice(QObject):
         self.signal_tracing_stopped.emit()
 
     def _event_handler(self, obj, a_can):
-        # [7] 0 - normal frame, 1 - error frame
-        # [6] 0-not logged, 1-already logged
-        # [5-3] tbd
-        # [2] 0-std frame, 1-extended frame
-        # [1] 0-data frame, 1-remote frame
-        # [0] dir: 0-RX, 1-TX
-        # ^^^^^^^^^^^^^^^^^^^^^^^^^^
-        # a_can.contents.FProperties
-
-        # counter = time.perf_counter()
-        # # Rx and Tx
-        # if counter - self._can_tx_start_time > self._refresh_time:
-        #     self._can_tx_start_time = counter
-        #     if not a_can.contents.FProperties & 0x80:
-        #         msg = a_can.contents
-        #
-        #         _time = str(float(msg.FTimeUs) / 1000000.0)
-        #         _channel = str(msg.FIdxChn + 1)
-        #         _id = str(hex(msg.FIdentifier))
-        #         _type = "CAN" if isinstance(msg, TLIBCAN) else "None"
-        #         _data_len_code = str(msg.FDLC)
-        #         _data_len = DLC_DATA_BYTE_CNT[msg.FDLC]
-        #
-        #         if (msg.FProperties & 1) == 1:
-        #             _dir = 'TX'
-        #             _data = [msg.FData[i] for i in range(_data_len)]
-        #         else:
-        #             _dir = 'RX'
-        #             _data = [f"0x{msg.FData[i]}" for i in range(_data_len)]
-        #
-        #         # Сгенерировать сигнал для обработки слотом добавления нового сообщения в таблицу
-        #         self.signal_new_message.emit(_time, _id, _dir, _data_len_code, _data)
-
         # 1 - error frame
         if a_can.contents.FProperties & 0x80:
             return
 
         msg = a_can.contents
         _time = str(float(msg.FTimeUs) / 1000000.0)
-        _channel = str(msg.FIdxChn + 1)
         _id = str(hex(msg.FIdentifier))
-        _type = "CAN" if isinstance(msg, TLIBCAN) else "None"
         _data_len_code = str(msg.FDLC)
         _data_len = DLC_DATA_BYTE_CNT[msg.FDLC]
         _dir = 'Tx' if (msg.FProperties & 1) == 1 else 'Rx'
         _data = [msg.FData[i] for i in range(_data_len)]
 
-        # Сгенерировать сигнал для обработки слотом добавления нового сообщения в таблицу
+        # TX кадры для UI логируются явно в send_async/send_sync.
+        # Из callback оставляем только RX, чтобы избежать дублей.
+        if _dir == 'Tx':
+            return
+
         self.signal_new_message.emit(_time, _id, _dir, _data_len_code, _data)
 
     def _create_message(self, iden: int, dlc: int, data: list[int]) -> TLIBCAN | None:
@@ -311,10 +280,35 @@ class CanDevice(QObject):
         message: TLIBCAN = self._create_message(iden, dlc, data)
         if message is None:
             return
-        return tsapp_transmit_can_async(self._hardware_handle, message)
+        ret = tsapp_transmit_can_async(self._hardware_handle, message)
+
+        # Явно логируем TX кадр для UI независимо от режима trace.
+        payload_len = min(max(int(dlc), 0), len(data))
+        payload = [int(data[i]) & 0xFF for i in range(payload_len)]
+        self.signal_new_message.emit(
+            f"{time.perf_counter():.6f}",
+            hex(int(iden) & 0x1FFFFFFF),
+            "Tx",
+            str(int(dlc)),
+            payload,
+        )
+
+        return ret
 
     def send_sync(self, iden: int, dlc: int, data: list[int], timeout: int):
         if self._hardware_handle is None or self._hardware_handle.value == 0:
             return
         message: TLIBCAN = self._create_message(iden, dlc, data)
-        return tsapp_transmit_can_sync(self._hardware_handle, message, timeout)
+        ret = tsapp_transmit_can_sync(self._hardware_handle, message, timeout)
+
+        payload_len = min(max(int(dlc), 0), len(data))
+        payload = [int(data[i]) & 0xFF for i in range(payload_len)]
+        self.signal_new_message.emit(
+            f"{time.perf_counter():.6f}",
+            hex(int(iden) & 0x1FFFFFFF),
+            "Tx",
+            str(int(dlc)),
+            payload,
+        )
+
+        return ret

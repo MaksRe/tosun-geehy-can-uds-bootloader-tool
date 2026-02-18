@@ -1,4 +1,4 @@
-﻿import QtQuick 2.15
+import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "."
@@ -32,7 +32,7 @@ Card {
     signal openFirmwareDialogRequested()
 
     Layout.fillWidth: true
-    Layout.preferredHeight: 568
+    Layout.preferredHeight: 560
 
     ColumnLayout {
         anchors.fill: parent
@@ -40,7 +40,7 @@ Card {
         spacing: 12
 
         Text {
-            text: "Bootloader"
+            text: "Программирование"
             color: root.textMain
             font.pixelSize: 22
             font.bold: true
@@ -61,6 +61,7 @@ Card {
 
             FancyTextField {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 text: root.appController ? root.appController.firmwarePath : ""
                 readOnly: true
                 placeholderText: "BIN-файл не выбран"
@@ -71,6 +72,8 @@ Card {
             }
 
             FancyButton {
+                Layout.preferredWidth: 170
+                Layout.minimumWidth: 156
                 text: root.appController && root.appController.firmwareLoading ? "Загрузка BIN..." : "Открыть BIN"
                 loading: root.appController ? root.appController.firmwareLoading : false
                 debugLog: root.appController ? root.appController.debugEnabled : false
@@ -156,36 +159,11 @@ Card {
             Layout.fillWidth: true
             spacing: 10
 
-            Text {
-                text: "Byte order"
-                color: root.textSoft
-                font.pixelSize: 13
-                font.family: "Bahnschrift"
-                Layout.preferredWidth: 130
-            }
-
-            FancyComboBox {
-                id: endianCombo
-                Layout.fillWidth: true
-                model: ["Big Endian (MSB first)", "Little Endian (LSB first)"]
-                currentIndex: root.appController ? root.appController.transferByteOrderIndex : 0
-                enabled: root.appController ? !root.appController.programmingActive : false
-                textColor: root.textMain
-                bgColor: root.inputBg
-                borderColor: root.inputBorder
-                focusBorderColor: root.inputFocus
-
-                onActivated: if (root.appController) root.appController.setTransferByteOrderIndex(currentIndex)
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 10
-
             FancyButton {
                 Layout.fillWidth: true
                 text: root.appController && root.appController.programmingActive ? "Идет загрузка..." : "Начать программирование"
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 enabled: root.appController ? (!root.appController.programmingActive && !root.appController.firmwareLoading) : false
                 tone: "#10b981"
                 toneHover: "#059669"
@@ -196,6 +174,8 @@ Card {
             FancyButton {
                 Layout.fillWidth: true
                 text: "Проверить статус"
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 tone: "#3b82f6"
                 toneHover: "#2563eb"
                 tonePressed: "#1d4ed8"
@@ -203,7 +183,10 @@ Card {
             }
 
             FancyButton {
+                Layout.fillWidth: true
                 text: "Очистить лог"
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 tone: "#ef4444"
                 toneHover: "#dc2626"
                 tonePressed: "#b91c1c"
@@ -219,6 +202,8 @@ Card {
             FancyButton {
                 Layout.fillWidth: true
                 text: "Сброс в загрузчик"
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 tone: "#14b8a6"
                 toneHover: "#0d9488"
                 tonePressed: "#0f766e"
@@ -228,6 +213,8 @@ Card {
             FancyButton {
                 Layout.fillWidth: true
                 text: "Сброс в основное ПО"
+                Layout.preferredWidth: 1
+                Layout.minimumWidth: 0
                 tone: "#6366f1"
                 toneHover: "#4f46e5"
                 tonePressed: "#4338ca"
@@ -333,5 +320,3 @@ Card {
         }
     }
 }
-
-
