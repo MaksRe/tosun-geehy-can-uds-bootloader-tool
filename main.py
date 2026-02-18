@@ -26,7 +26,12 @@ if __name__ == "__main__":
     controller = AppController()
     engine.rootContext().setContextProperty("appController", controller)
 
-    qml_path = Path(__file__).resolve().parent / "ui" / "qml" / "Main.qml"
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(__file__).resolve().parent
+
+    qml_path = base_path / "ui" / "qml" / "Main.qml"
     engine.load(QUrl.fromLocalFile(str(qml_path)))
 
     if not engine.rootObjects():
