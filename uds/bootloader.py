@@ -43,12 +43,16 @@ class BootloaderState(enum.IntEnum):
     ECU_UDS_RESET = 12,
     ECU_SOFTWARE_RESET = 13,
 
-    READ_FINGERPRINT = 14,
+    READ_ACTIVE_PROGRAM = 14,
 
     VERIFICATION = 15,
     DONE = 16
     WRITE_CAN_SOURCE_ADDRESS = 17
     READ_CAN_SOURCE_ADDRESS = 18
+
+
+ACTIVE_PROGRAM_APP = 0x00
+ACTIVE_PROGRAM_BOOTLOADER = 0x01
 
 
 class Bootloader(QObject):
@@ -179,9 +183,9 @@ class Bootloader(QObject):
         self.signal_new_state.emit("Запрос на сброс МК для перехода в основную программу", RowColor.blue)
 
     def check_state(self):
-        self._service_read_data_by_id.read_data(UdsData.fingerprint)
+        self._service_read_data_by_id.read_data(UdsData.active_program)
 
-        self._state = BootloaderState.READ_FINGERPRINT
+        self._state = BootloaderState.READ_ACTIVE_PROGRAM
         self.signal_new_state.emit("Чтение статуса", RowColor.blue)
 
     def start(self) -> bool:
@@ -218,6 +222,18 @@ class Bootloader(QObject):
             if identifier != UdsIdentifiers.rx.identifier:
                 return
 
+        if (self._state == BootloaderState.SET_PROGRAMMING_SESSION and
+                not self._service_session.verify_answer(_data)):
+            self.signal_new_state.emit("Ошибка перехода в сессию 'programming'", RowColor.red)
+            self._state = BootloaderState.READY
+            return
+
+        if (self._state == BootloaderState.READ_ACTIVE_PROGRAM and
+                not self._service_read_data_by_id.verify_answer_read_data(_data)):
+            self.signal_new_state.emit("Не удалось определить активную программу", RowColor.red)
+            self._state = BootloaderState.READY
+            return
+
         if self._state == BootloaderState.SET_PROGRAMMING_SESSION:
             if self._service_session.verify_answer(_data):
 
@@ -229,6 +245,9 @@ class Bootloader(QObject):
                 self.signal_new_state.emit("Запрос seed-фразы", RowColor.blue)
 
             else:
+                self.signal_new_state.emit("Не удалось определить активную программу", RowColor.red)
+                self._state = BootloaderState.READY
+                return
                 self.signal_new_state.emit("Ошибка перехода в сессию 'programming'", RowColor.red)
 
         elif self._state == BootloaderState.REQUEST_SEED:
@@ -394,8 +413,17 @@ class Bootloader(QObject):
                 self.signal_new_state.emit("Ошибка сброса", RowColor.red)
                 self._state = BootloaderState.READY
 
-        elif self._state == BootloaderState.READ_FINGERPRINT:
+        elif self._state == BootloaderState.READ_ACTIVE_PROGRAM:
             if self._service_read_data_by_id.verify_answer_read_data(_data):
+                active_program = self._service_read_data_by_id.parse_data_field(_data) & 0xFF
+                if active_program == ACTIVE_PROGRAM_BOOTLOADER:
+                    self.signal_new_state.emit("Загрузчик активен", RowColor.green)
+                elif active_program == ACTIVE_PROGRAM_APP:
+                    self.signal_new_state.emit("Основная программа активна", RowColor.green)
+                else:
+                    self.signal_new_state.emit(f"Неизвестный тип программы: 0x{active_program:02X}", RowColor.red)
+                self._state = BootloaderState.READY
+                return
 
                 self.signal_new_state.emit("Загрузчик активен", RowColor.green)
                 self._state = BootloaderState.READY
@@ -406,5 +434,3 @@ class Bootloader(QObject):
         if self._state == BootloaderState.ERROR:
             pass
             # CanDevice.instance().signal_new_message.disconnect(self.on_new_message)
-
-

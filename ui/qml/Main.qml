@@ -224,10 +224,12 @@ ApplicationWindow {
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         ColumnLayout {
+            id: rootColumn
             width: Math.max(0, contentScroll.availableWidth)
             spacing: 12
 
             HeaderCard {
+                id: headerCard
                 appController: window.backendController
                 cardColor: window.cardColor
                 cardBorder: window.cardBorder
@@ -250,16 +252,20 @@ ApplicationWindow {
                 readonly property bool wideLayout: contentScroll.availableWidth > 1180
                 readonly property int sidePanelWidth: Math.max(430, Math.min(500, Math.round(contentScroll.availableWidth * 0.36)))
                 readonly property int gap: 12
+                readonly property real viewportHeight: Math.max(0, contentScroll.availableHeight - headerCard.height - rootColumn.spacing)
+                Layout.preferredHeight: Math.max(implicitHeight, viewportHeight)
                 implicitHeight: dashboardLoader.item ? dashboardLoader.item.implicitHeight : 0
 
                 Loader {
                     id: dashboardLoader
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
+                    anchors.fill: parent
                     sourceComponent: dashboardArea.wideLayout ? wideDashboard : narrowDashboard
-                    onLoaded: if (item) item.width = width
+                    onLoaded: if (item) {
+                        item.width = width
+                        item.height = height
+                    }
                     onWidthChanged: if (item) item.width = width
+                    onHeightChanged: if (item) item.height = height
                 }
 
                 Component {
@@ -272,6 +278,7 @@ ApplicationWindow {
                         ColumnLayout {
                             id: leftColumn
                             Layout.fillWidth: true
+                            Layout.fillHeight: true
                             Layout.alignment: Qt.AlignTop
                             spacing: dashboardArea.gap
 
@@ -297,6 +304,7 @@ ApplicationWindow {
                                 inputBorder: window.inputBorder
                                 inputFocus: window.inputFocus
                                 Layout.fillWidth: true
+                                Layout.fillHeight: true
                                 onOpenFirmwareDialogRequested: firmwareDialog.open()
                             }
                         }
@@ -510,6 +518,7 @@ ApplicationWindow {
                             inputBorder: window.inputBorder
                             inputFocus: window.inputFocus
                             Layout.fillWidth: true
+                            Layout.fillHeight: true
                             onOpenFirmwareDialogRequested: firmwareDialog.open()
                         }
                     }

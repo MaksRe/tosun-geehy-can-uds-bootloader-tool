@@ -33,6 +33,7 @@ Card {
     signal openFirmwareDialogRequested()
 
     Layout.fillWidth: true
+    Layout.fillHeight: true
     implicitHeight: contentColumn.implicitHeight + (root.contentPadding * 2)
 
     ColumnLayout {
@@ -40,9 +41,11 @@ Card {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
+        anchors.bottom: parent.bottom
         anchors.leftMargin: root.contentPadding
         anchors.rightMargin: root.contentPadding
         anchors.topMargin: root.contentPadding
+        anchors.bottomMargin: root.contentPadding
         spacing: 10
 
         Text {
@@ -283,7 +286,8 @@ Card {
         // Журнал состояния bootloader-сценария.
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 210
+            Layout.fillHeight: true
+            Layout.minimumHeight: 210
             radius: 12
             color: "#f4f8fd"
             border.color: "#d6e2ef"
